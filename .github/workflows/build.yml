@@ -25,20 +25,20 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython "python-for-android>=2024.1.1"
 
-      - name: Accept Android SDK Licenses
+      - name: Pre-accept Buildozer SDK licenses
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          # Initialise l'arborescence Buildozer et pré-accepte absolument toutes les licences
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          
+          # Clés d'acceptation de licences officielles d'Android SDK
+          echo -e "2433373574b44d1528f65d33db1509291ee07e0e\n89330d322475b11d56e1ce783dcd212fc6221619\nd56f5187479451eabf01fb78af6dfcb131a6481e" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          echo -e "84831b94fe6460066657176d450d700efe0a9272" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+          echo -e "d97537e51534a113e3b0185121e78c00562e8436" > ~/.buildozer/android/platform/android-sdk/licenses/intel-android-sys-img-license
 
       - name: Build APK with Buildozer
-        env:
-          ANDROIDSDK: ${{ env.ANDROID_HOME }}
-          ANDROIDNDK: ${{ env.ANDROID_NDK_LATEST_HOME }}
         run: |
-          # Création du lien symbolique pour rétrocompatibilité sdkmanager si nécessaire
-          mkdir -p $ANDROID_HOME/tools/bin
-          ln -sf $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager $ANDROID_HOME/tools/bin/sdkmanager || true
-          
-          buildozer --debug android debug
+          # Redirige 'yes' pour valider n'importe quelle invite résiduelle
+          yes | buildozer --debug android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
